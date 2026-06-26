@@ -1,25 +1,58 @@
 #!/bin/bash
+set -e
 
-# Fix: Add GitHub's host key 
+# GitHub host key
 mkdir -p ~/.ssh
 ssh-keyscan -t rsa,ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
 
-# init repo
+# local_manifests
+if [ ! -d ".repo/local_manifests" ]; then
+    git clone https://github.com/inoo-droid/local_manifests.git .repo/local_manifests/
+fi
+# BLISSS BLISS
 repo init -u https://github.com/BlissRoms/stable_releases.git -b refs/tags/v18.7-stable-voyager --git-lfs
-
+# Sync source
 /opt/crave/resync.sh
 
-# Your device trees
-git clone https://github.com/mt6768-dev/android_device_xiaomi_earth.git -b lineage-22.2 device/xiaomi/earth
-git clone https://github.com/mt6768-dev/proprietary_vendor_xiaomi_earth.git -b lineage-22.2 vendor/xiaomi/earth
-git clone https://github.com/mt6768-dev/android_kernel_xiaomi_earth.git -b lineage-23.2 kernel/xiaomi/earth
-git clone https://github.com/LineageOS/android_hardware_xiaomi.git -b lineage-22.2 hardware/xiaomi
-git clone https://github.com/LineageOS/android_hardware_mediatek.git -b lineage-22.2 hardware/mediatek
-git clone https://github.com/LineageOS/android_device_mediatek_sepolicy_vndr.git -b lineage-22.2 device/mediatek/sepolicy_vndr
+# --- FIX DEVICE TREE FOR BLISS ---
 
-# Wrap special characters in single quotes to avoid bash issues
+cd device/xiaomi/earth
+
+# Create bliss_earth.mk inheriting from lineage_earth.mk
+if [ ! -f "bliss_earth.mk" ]; then
+    cat > bliss_earth.mk << 'EOF'
+# Inherit from Lineage device config
+$(call inherit-product, device/xiaomi/earth/lineage_earth.mk)
+
+# Override product name for Bliss
+PRODUCT_NAME := bliss_earth
+EOF
+fi
+
+# Register bliss_earth.mk in AndroidProducts.mk
+if [ -f "AndroidProducts.mk" ]; then
+    if ! grep -q "bliss_earth.mk" AndroidProducts.mk; then
+        sed -i 's|lineage_earth.mk|bliss_earth.mk \\\n    $(LOCAL_DIR)/lineage_earth.mk|' AndroidProducts.mk
+    fi
+else
+    cat > AndroidProducts.mk << 'EOF'
+PRODUCT_MAKEFILES := \
+    $(LOCAL_DIR)/bliss_earth.mk \
+    $(LOCAL_DIR)/lineage_earth.mk
+EOF
+fi
+
+cd -
+
+# --- BUILD ---
+
 export BUILD_USERNAME='sarkazz!?'
 export BUILD_HOSTNAME=Ulinux
 
-. build/envsetup.sh
+source build/envsetup.sh
+
+# Android 15 QPR2 release config
+export TARGET_RELEASE=bp1a
+
+# Build
 blissify earth
