@@ -16,3 +16,10 @@ lunch lineage_earth-bp4a-userdebug
 
 # To build
 m bacon -j$(nproc --all)
+
+# Upload files to github
+echo "Upload to github will be started..."
+if [ -f out/target/product/earth/*.zip ]; then
+  bash /opt/crave/github-actions/upload.sh 'avium' 'earth' 'https://github.com/inoo-droid/Earth_Release' 'avium16.2' 
+fi
+echo "done"
