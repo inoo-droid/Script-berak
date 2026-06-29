@@ -1,3 +1,7 @@
+rm -rf .repo/local_manifests
+
+git clone https://github.com/inoo-droid/local_manifests.git .repo/local_manifests/
+
 # BLISSS BLISS
 repo init -u https://github.com/AviumUI/android_manifests -b avium-16.2 --git-lfs
 # Sync source
