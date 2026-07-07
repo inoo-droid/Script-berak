@@ -19,7 +19,7 @@ export BUILD_HOSTNAME=Ulinux
 lunch lineage_earth-bp4a-user
 
 # To build
-m bacon -j$(nproc --all)
+m bacon
 
 # Upload files to github
 echo "Upload to github will be started..."
