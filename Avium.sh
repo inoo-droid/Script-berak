@@ -16,7 +16,7 @@ export BUILD_HOSTNAME=Ulinux
 . build/envsetup.sh
 
 # Choose a target
-lunch lineage_earth-bp4a-userdebug
+lunch lineage_earth-bp4a-user
 
 # To build
 m bacon -j$(nproc --all)
