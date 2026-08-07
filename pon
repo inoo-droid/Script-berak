@@ -1,0 +1,28 @@
+#!/bin/bash
+
+echo "SUPER..."
+# init rom source
+    repo init -u https://github.com/SuperiorOS/manifest.git -b fifteen-los -m stable/latest.xml --git-lfs --depth=1
+
+# Device sources
+https://github.com/inoo-droid/local_manifests.git -b 22.2 .repo/local_manifests
+
+echo "repo sync..."
+/opt/crave/resync.sh # sync source
+echo "done..."
+
+echo "Hello superior, build has started."
+# build start
+. build/envsetup.sh
+breakfast earth
+m superior
+echo "Build done."
+
+# Upload files
+echo "Upload file will be started..."
+if [ -f out/target/product/earth/*.zip ]; then
+    bash /opt/crave/github-actions/upload.sh '15.2' 'earth' 'https://github.com/JeanneDarc-star/Releases' 'Superior' 'extra files'
+    echo "Upload Done!"
+else
+    echo "No zip found!" 
+fi
